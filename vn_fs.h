@@ -23,7 +23,7 @@
     #endif /* VN_DIRECTORY */
 #endif /* SUMMARY SECTION */
 
-#ifdef VN_IMPLEMENTATION
+#ifdef VN_FS_IMPLEMENTATION
     /* STANDARD LIBRARY */
     #include <stdio.h>
     #include <stdlib.h>
@@ -257,4 +257,4 @@
             if(!strcmp(dir_com, "dd")) { rmdir(dir_name); } /* DELETE DIRECTORY */
         } /* 'path_buffer' IS BUFFER FOR 'current_dir' */
     #endif /* VN_DIRECTORY */
-#endif /* VN_IMPLEMENTATION */
+#endif /* VN_FS_IMPLEMENTATION */
