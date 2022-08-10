@@ -29,7 +29,7 @@
 /* SOME COMMANDS NOT SECURE */
 char *vn_dir(char *dir_com, char *dir_name, int path_buffer)
 { /* 'dir_com' = DIRECTORY COMMAND */
-    if(strcmp(dir_name, "cd") && strcmp(dir_name, "cc") && strcmp(dir_name, "dd")) /* 'dir_com' ERROR */
+    if(strcmp(dir_com, "cd") && strcmp(dir_com, "cc") && strcmp(dir_com, "dd")) /* 'dir_com' ERROR */
     {
         fprintf(stderr, "\n[ERROR] In 'vn_dir()' function. 'dir_com' not correct!\n");
         exit(1);
