@@ -1,25 +1,30 @@
 /* VARIATION FS (LIBRARY) */
 /*     MADE BY @hanilr    */
-#ifdef _VN_FS_H
-#define _VN_FS_H
-    #ifdef VN_READ
-        char *vn_read(char *file_name, char *file_perm, int file_line); /* FILE READ FUNCTION */
+#ifndef _VN_FS_H
+#define _VN_FS_H    
+    struct vn_fss /* '0' STOP FUNCTION WHEN ERROR RECEIVED */
+    { /* '1' DON'T STOP FUNCTION WHEN ERROR RECEIVED */
+        int fs_security; /* ONLY '0', '1' AND '2' CAN PROCESS */
+    }; /* '2' DON'T DO ANYTHING WHEN ERROR RECEIVED */
 
-        char *vnl_read(char *file_name, int file_line, int start_pos, int end_pos); /* FILE ADVANCE LINE READ FUNCTION */
+    #ifdef VN_READ
+        char *vn_read(char *file_name, char *file_perm, int file_line, struct vn_fss vns); /* FILE READ FUNCTION */
+
+        char *vnl_read(char *file_name, int file_line, int start_pos, int end_pos, struct vn_fss vns); /* FILE ADVANCE LINE READ FUNCTION */
     #endif /* VN_READ */
 
     #ifdef VN_WRITE
-        void vn_write(char *file_name, char *file_content, char *file_perm); /* FILE WRITE FUNCTION */
+        void vn_write(char *file_name, char *file_content, char *file_perm, struct vn_fss vns); /* FILE WRITE FUNCTION */
 
-        void vnl_write(char *file_name, char *file_content, int line); /* FILE ADVANCE LINE WRITE FUNCTION */
+        void vnl_write(char *file_name, char *file_content, int line, struct vn_fss vns); /* FILE ADVANCE LINE WRITE FUNCTION */
     #endif /* VN_WRITE */
 
     #ifdef VN_MANIPULATION
-        void vn_man(char *file_name, char *file_to, char *file_perm); /* FILE MANIPULATION FUNCTION */
+        void vn_man(char *file_name, char *file_to, char *file_perm, struct vn_fss vns); /* FILE MANIPULATION FUNCTION */
     #endif /* VN_MANIPULATION */
 
     #ifdef VN_DIRECTORY
-        char *vn_dir(char *dir_com, char *dir_name, int path_buffer); /* DIRECTORY MANIPULATION FUNCTION */
+        char *vn_dir(char *dir_com, char *dir_name, int path_buffer, struct vn_fss vns); /* DIRECTORY MANIPULATION FUNCTION */
     #endif /* VN_DIRECTORY */
 #endif /* SUMMARY SECTION */
 
@@ -47,13 +52,13 @@
         * ------------------------ */
 
         /* 'file_line' ERROR HANDLING MISSING IN 'vn_read' FUNCTION IN 'rl' SECTION */
-        char *vn_read(char *file_name, char *file_perm, int file_line)
+        char *vn_read(char *file_name, char *file_perm, int file_line, struct vn_fss vns)
         { /* IF YOU DON'T USE 'file_line' VARIABLE YOU MIGHT NEED TO INSERT '0' IN IT */
             FILE *vnr = fopen(file_name, "r"); /* OPEN FILE AS READ OPERATION */
-            if(vnr == 0) /* FILE ERROR */
+            if(vnr == 0 && vns.fs_security !=2) /* FILE ERROR */
             {
                 fprintf(stderr, "\n[ERROR] In 'vn_read()' function. File didn't find!\n");
-                exit(1);
+                if(vns.fs_security == 0) { exit(1); }
             } 
 
             long file_size;
@@ -64,10 +69,10 @@
             char *file_content = (char*) malloc(file_size+1); /* ALLOCATE 'file_content' */
             memset(file_content, '\0', file_size+1);
 
-            if(strcmp(file_perm, "rw") && strcmp(file_perm, "rl")) /* 'file_perm' ERROR */
+            if(strcmp(file_perm, "rw") && strcmp(file_perm, "rl") && vns.fs_security !=2) /* 'file_perm' ERROR */
             {
                 fprintf(stderr, "\n[ERROR] In 'vn_read()' function. 'file_perm' not correct!\n");
-                exit(1);
+                if(vns.fs_security == 0) { exit(1); }
             }
             if(!strcmp(file_perm, "rw") && file_line == 0) { fread(file_content, file_size+1, 1, vnr); } /* READ WHOLE FILE */
             if(!strcmp(file_perm, "rl")) /* READ LINE BY LINE */
@@ -85,15 +90,15 @@
             return file_content;
         } /* NEED TO BE 'free()' AFTER USE */
 
-        char *vnl_read(char *file_name, int file_line, int start_pos, int end_pos)
+        char *vnl_read(char *file_name, int file_line, int start_pos, int end_pos, struct vn_fss vns)
         {
-            if(start_pos > end_pos)
+            if(start_pos > end_pos && vns.fs_security !=2)
             {
                 fprintf(stderr, "\n[ERROR] In 'vnl_read()' function. 'start_pos' greater than 'end_pos'\n");
-                exit(1);
+                if(vns.fs_security == 0) { exit(1); }
             }
 
-            char *line_temp = vn_read(file_name, "rl", file_line); /* GET CERTAIN LINE OF FILE */
+            char *line_temp = vn_read(file_name, "rl", file_line, vns); /* GET CERTAIN LINE OF FILE */
             char *line_content = (char*) malloc(end_pos-start_pos+1); /* ALLOCATE 'line_content' */
 
             int i = 0;
@@ -115,20 +120,19 @@
         * 'ww' = WRITE WHOLE FILE   *
         * 'wa' = WRITE AS APPEND    *
         * ------------------------- */
-
-        void vn_write(char *file_name, char *file_content, char *file_perm)
+        void vn_write(char *file_name, char *file_content, char *file_perm, struct vn_fss vns)
         { /* IF YOU DON'T USE 'file_content' YOU MIGHT NEED TO INSERT '""' IN IT */
             char *file_form = "w";
             if(!strcmp(file_perm, "wa")) { file_form = "a"; }
 
             FILE *vnw = fopen(file_name, file_form);
-            if(vnw == 0 && strcmp(file_perm, "wc")) /* FILE ERROR */
+            if(vnw == 0 && strcmp(file_perm, "wc") && vns.fs_security !=2) /* FILE ERROR */
             {
                 fprintf(stderr, "\n[ERROR] In 'vn_write()' function. File didn't find!\n");
                 exit(1);    
             }
 
-            if(strcmp(file_perm, "wc") && strcmp(file_perm, "ww") && strcmp(file_perm, "wa")) /* 'file_perm' ERROR */
+            if(strcmp(file_perm, "wc") && strcmp(file_perm, "ww") && strcmp(file_perm, "wa") && vns.fs_security !=2) /* 'file_perm' ERROR */
             {
                 fprintf(stderr, "\n[ERROR] In 'vn_write()' function. 'file_perm' not correct!\n");
                 exit(1);    
@@ -139,10 +143,10 @@
             fclose(vnw);
         } /* IF YOU DON'T USE 'file_line' VARIABLE YOU MIGHT NEED TO INSERT '0' IN IT */
 
-        void vnl_write(char *file_name, char *file_content, int line)
+        void vnl_write(char *file_name, char *file_content, int line, struct vn_fss vns)
         { /* VN LINE WRITE FUNCTION */
-            char *file_temp = vn_read(file_name, "rw", 0); /* GET WHOLE FILE */
-            char *line_temp = vn_read(file_name, "rl", line); /* GET CERTAIN LINE OF FILE */
+            char *file_temp = vn_read(file_name, "rw", 0, vns); /* GET WHOLE FILE */
+            char *line_temp = vn_read(file_name, "rl", line, vns); /* GET CERTAIN LINE OF FILE */
 
             int i = 0, file_line = 1;
             while(strlen(file_temp)+1 > i) /* GET FILE NEW LINE COUNT */
@@ -150,7 +154,7 @@
                 if(file_temp[i] == '\n') { file_line+=1; }
                 i+=1;
             }
-            if(line > file_line) /* ERROR WHEN ENTERED LINE INVAILD */
+            if(line > file_line && vns.fs_security !=2) /* ERROR WHEN ENTERED LINE INVAILD */
             {
                 fprintf(stderr, "\n[ERROR] In 'vnl_write()' function. 'line' value greater than file line!\n");
                 exit(1);
@@ -160,7 +164,7 @@
             int start_len = strlen(file_temp) - strlen(wstart_temp); /* START SUBSTRING LENGTH */
             int line_len = strlen(line_temp); /* OLD LINE LENGTH */
             int end_len = strlen(file_temp) - (start_len+line_len); /* END SUBSTRING LENGTH */
-        
+            
             char *start_temp = (char*) malloc(start_len); /* START BUFFER */
             char *end_temp = (char*) malloc(end_len); /* END BUFFER */
 
@@ -173,9 +177,9 @@
             start_temp[start_len-1] = '\0'; /* ADD END OF LINE TO START BUFFER */
             i=0;
 
-            vn_write(file_name, start_temp, "ww"); /* WRITE START BUFFER TO FILE AS 'ww' (WRITE WHOLE) */
-            vn_write(file_name, "\n", "wa"); /* ADD NEW LINE */
-            vn_write(file_name, file_content, "wa"); /* WRITE NEW LINE TO FILE AS 'wa' (APPEND) */
+            vn_write(file_name, start_temp, "ww", vns); /* WRITE START BUFFER TO FILE AS 'ww' (WRITE WHOLE) */
+            vn_write(file_name, "\n", "wa", vns); /* ADD NEW LINE */
+            vn_write(file_name, file_content, "wa", vns); /* WRITE NEW LINE TO FILE AS 'wa' (APPEND) */
             if(line != file_line) /* IF LAST LINE OF FILE */
             {
                 while(end_len > i) /* GET END BUFFER */
@@ -185,8 +189,8 @@
                 }
                 end_temp[i] = '\0'; /* ADD END OF LINE TO END BUFFER */
 
-                vn_write(file_name, "\n", "wa"); /* ADD NEW LINE */
-                vn_write(file_name, end_temp, "wa"); /* WRITE END BUFFER TO FILE AS 'wa' (APPEND) */
+                vn_write(file_name, "\n", "wa", vns); /* ADD NEW LINE */
+                vn_write(file_name, end_temp, "wa", vns); /* WRITE END BUFFER TO FILE AS 'wa' (APPEND) */
             }
 
             free(file_temp);
@@ -201,17 +205,17 @@
         * 'del' = DELETE AFTER COPY/MOVE   *
         * -------------------------------- */
 
-        void vn_man(char *file_name, char *file_to, char *file_perm)
+        void vn_man(char *file_name, char *file_to, char *file_perm, struct vn_fss vns)
         {
-            char *file_content = vn_read(file_name, "rw", 0); /* GET WHOLE FILE*/
+            char *file_content = vn_read(file_name, "rw", 0, vns); /* GET WHOLE FILE*/
             if(!strcmp(file_perm, "del")) { remove(file_name); } /* IF USER WANT TO DELETE */
-            if(strcmp(file_perm, "del")) /* 'file_perm' ERROR */
+            if(strcmp(file_perm, "del") && vns.fs_security !=2) /* 'file_perm' ERROR */
             {
                 fprintf(stderr, "\n[ERROR] In 'vn_man()' function. 'file_perm' not correct!\n");
-                exit(1);
+                if(vns.fs_security == 0) { exit(1); }
             }
 
-            vn_write(file_to, file_content, "ww"); /* WRITE TO NEW PATH */
+            vn_write(file_to, file_content, "ww", vns); /* WRITE TO NEW PATH */
             free(file_content); /* 'vn_read' FUNCTION NEED TO BE FREE AFTER USE */
         }
     #endif /* VN_MANIPULATION */
@@ -225,12 +229,12 @@
         * ----------------------------------------------- */
 
         /* SOME COMMANDS NOT SECURE */
-        char *vn_dir(char *dir_com, char *dir_name, int path_buffer)
+        char *vn_dir(char *dir_com, char *dir_name, int path_buffer, struct vn_fss vns)
         { /* 'dir_com' = DIRECTORY COMMAND */
-            if(strcmp(dir_com, "cd") && strcmp(dir_com, "cc") && strcmp(dir_com, "dd")) /* 'dir_com' ERROR */
+            if(strcmp(dir_com, "cd") && strcmp(dir_com, "cc") && strcmp(dir_com, "dd") && vns.fs_security !=2) /* 'dir_com' ERROR */
             {
                 fprintf(stderr, "\n[ERROR] In 'vn_dir()' function. 'dir_com' not correct!\n");
-                exit(1);
+                if(vns.fs_security == 0) { exit(1); }
             }
             if(!strcmp(dir_com, "cd") && !strcmp(dir_name, ".") && path_buffer != 0) /* CURRENT DIRECTORY */
             {
@@ -239,10 +243,10 @@
                 char *current_dir = cd_buffer; /* YOU CAN'T RETURN LOCAL VARIABLES EXCEPT POINTERS */
                 return current_dir;
             }
-            if(!strcmp(dir_name, "")) /* ERROR WHEN 'dir_name' EMPTY */
+            if(!strcmp(dir_name, "") && vns.fs_security !=2) /* ERROR WHEN 'dir_name' EMPTY */
             {
                 fprintf(stderr, "\n[ERROR] In 'vn_dir()' function. 'dir_name' is empty!\n");
-                exit(1);
+                if(vns.fs_security == 0) { exit(1); }
             }
 
             if(!strcmp(dir_com, "cd")) { chdir(dir_name); } /* CHANGE DIRECTORY */
