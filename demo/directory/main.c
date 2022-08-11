@@ -6,13 +6,18 @@
 
 int main()
 {
-    printf("\n%s\n", vn_dir("cd", ".", 1024)); /* GET CURRENT DIRECTORY */
-    vn_dir("cc", "test", 0); /* CREATE DIRECTORY */
-    vn_dir("cd", "test", 0); /* CHANGE DIRECTORY */
-    printf("\n%s\n", vn_dir("cd", ".", 1024)); /* GET CURRENT DIRECTORY */
-    vn_dir("cd", "..", 0); /* CHANGE DIRECTORY */
-    printf("\n%s\n", vn_dir("cd", ".", 1024)); /* GET CURRENT DIRECTORY */
-    vn_dir("dd", "test", 0); /* DELETE DIRECTORY */
+    struct vn_fss vns; /* VARIATION TUI SECURITY */
+    vns.fs_security = 0; /* STOP FUNCTION WHEN ERROR RECEIVED */
+
+    printf("\n%s\n", vn_dir("cd", ".", 1024, vns)); /* GET CURRENT DIRECTORY */
+    vn_dir("cc", "test", 0, vns); /* CREATE DIRECTORY */
+
+    vn_dir("cd", "test", 0, vns); /* CHANGE DIRECTORY */
+    printf("\n%s\n", vn_dir("cd", ".", 1024, vns)); /* GET CURRENT DIRECTORY */
+    
+    vn_dir("cd", "..", 0, vns); /* CHANGE DIRECTORY */
+    printf("\n%s\n", vn_dir("cd", ".", 1024, vns)); /* GET CURRENT DIRECTORY */
+    vn_dir("dd", "test", 0, vns); /* DELETE DIRECTORY */
 
     return 0;
 }

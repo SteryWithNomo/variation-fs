@@ -7,10 +7,13 @@
 
 int main()
 {
-    vn_write("test.txt", "", "wc"); /* CREATE A FILE */
-    vn_write("test.txt", "Hey,\nhow are you?\nAre you good?", "ww"); /* WRITE WHOLE FILE */
-    vn_write("test.txt", "\nFoo and Bar. This is the way!", "wa"); /* WRITE AS APPEND */
-    vnl_write("test.txt", "?ouy era woh", 2);  /* CHANGE CERTAIN LINE */
+    struct vn_fss vns; /* VARIATION TUI SECURITY */
+    vns.fs_security = 0; /* STOP FUNCTION WHEN ERROR RECEIVED */
+
+    vn_write("test.txt", "", "wc", vns); /* CREATE A FILE */
+    vn_write("test.txt", "Hey,\nhow are you?\nAre you good?", "ww", vns); /* WRITE WHOLE FILE */
+    vn_write("test.txt", "\nFoo and Bar. This is the way!", "wa", vns); /* WRITE AS APPEND */
+    vnl_write("test.txt", "?ouy era woh", 2, vns);  /* CHANGE CERTAIN LINE */
 
     return 0;
 }

@@ -8,9 +8,12 @@
 
 int main()
 {
-    vn_man("test_1.txt", "test_1_renamed.txt", "del"); /* NAME CHANGE */
-    vn_man("test_2.txt", "test_2/test_2_move.txt", "del"); /* MOVE */
-    vn_man("test_3.txt", "test_3/test_3_copy.txt", "del"); /* COPY */
+    struct vn_fss vns; /* VARIATION TUI SECURITY */
+    vns.fs_security = 0; /* STOP FUNCTION WHEN ERROR RECEIVED */
+
+    vn_man("test_1.txt", "test_1_renamed.txt", "del", vns); /* NAME CHANGE */
+    vn_man("test_2.txt", "test_2/test_2_move.txt", "del", vns); /* MOVE */
+    vn_man("test_3.txt", "test_3/test_3_copy.txt", "del", vns); /* COPY */
 
     return 0;
 }
