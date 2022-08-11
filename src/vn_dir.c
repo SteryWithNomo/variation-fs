@@ -7,6 +7,7 @@
 
 /* DIY LIBRARY */
 #include "lib/vn_dir.h"
+#include "lib/vn_conf.h"
 
 #ifdef _WIN32
     #include <direct.h> /* WINDOWS DIRECTORY MANIPULATION LIBRARY */
@@ -27,12 +28,12 @@
 * ----------------------------------------------- */
 
 /* SOME COMMANDS NOT SECURE */
-char *vn_dir(char *dir_com, char *dir_name, int path_buffer)
+char *vn_dir(char *dir_com, char *dir_name, int path_buffer, struct vn_fss vns)
 { /* 'dir_com' = DIRECTORY COMMAND */
-    if(strcmp(dir_com, "cd") && strcmp(dir_com, "cc") && strcmp(dir_com, "dd")) /* 'dir_com' ERROR */
+    if(strcmp(dir_com, "cd") && strcmp(dir_com, "cc") && strcmp(dir_com, "dd") && vns.fs_security !=2) /* 'dir_com' ERROR */
     {
         fprintf(stderr, "\n[ERROR] In 'vn_dir()' function. 'dir_com' not correct!\n");
-        exit(1);
+        if(vns.fs_security == 0) { exit(1); }
     }
     if(!strcmp(dir_com, "cd") && !strcmp(dir_name, ".") && path_buffer != 0) /* CURRENT DIRECTORY */
     {
@@ -41,10 +42,10 @@ char *vn_dir(char *dir_com, char *dir_name, int path_buffer)
         char *current_dir = cd_buffer; /* YOU CAN'T RETURN LOCAL VARIABLES EXCEPT POINTERS */
         return current_dir;
     }
-    if(!strcmp(dir_name, "")) /* ERROR WHEN 'dir_name' EMPTY */
+    if(!strcmp(dir_name, "") && vns.fs_security !=2) /* ERROR WHEN 'dir_name' EMPTY */
     {
         fprintf(stderr, "\n[ERROR] In 'vn_dir()' function. 'dir_name' is empty!\n");
-        exit(1);
+        if(vns.fs_security == 0) { exit(1); }
     }
 
     if(!strcmp(dir_com, "cd")) { chdir(dir_name); } /* CHANGE DIRECTORY */

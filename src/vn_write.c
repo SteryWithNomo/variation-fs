@@ -7,6 +7,7 @@
 
 /* DIY LIBRARY */
 #include "lib/vn_write.h"
+#include "lib/vn_conf.h"
 #include "lib/vn_read.h"
 
 /* ----- COMMAND LIST ----- *
@@ -15,19 +16,19 @@
 * 'wa' = WRITE AS APPEND    *
 * ------------------------- */
 
-void vn_write(char *file_name, char *file_content, char *file_perm)
+void vn_write(char *file_name, char *file_content, char *file_perm, struct vn_fss vns)
 { /* IF YOU DON'T USE 'file_content' YOU MIGHT NEED TO INSERT '""' IN IT */
     char *file_form = "w";
     if(!strcmp(file_perm, "wa")) { file_form = "a"; }
 
     FILE *vnw = fopen(file_name, file_form);
-    if(vnw == 0 && strcmp(file_perm, "wc")) /* FILE ERROR */
+    if(vnw == 0 && strcmp(file_perm, "wc") && vns.fs_security !=2) /* FILE ERROR */
     {
         fprintf(stderr, "\n[ERROR] In 'vn_write()' function. File didn't find!\n");
         exit(1);    
     }
 
-    if(strcmp(file_perm, "wc") && strcmp(file_perm, "ww") && strcmp(file_perm, "wa")) /* 'file_perm' ERROR */
+    if(strcmp(file_perm, "wc") && strcmp(file_perm, "ww") && strcmp(file_perm, "wa") && vns.fs_security !=2) /* 'file_perm' ERROR */
     {
         fprintf(stderr, "\n[ERROR] In 'vn_write()' function. 'file_perm' not correct!\n");
         exit(1);    
@@ -38,10 +39,10 @@ void vn_write(char *file_name, char *file_content, char *file_perm)
     fclose(vnw);
 } /* IF YOU DON'T USE 'file_line' VARIABLE YOU MIGHT NEED TO INSERT '0' IN IT */
 
-void vnl_write(char *file_name, char *file_content, int line)
+void vnl_write(char *file_name, char *file_content, int line, struct vn_fss vns)
 { /* VN LINE WRITE FUNCTION */
-    char *file_temp = vn_read(file_name, "rw", 0); /* GET WHOLE FILE */
-    char *line_temp = vn_read(file_name, "rl", line); /* GET CERTAIN LINE OF FILE */
+    char *file_temp = vn_read(file_name, "rw", 0, vns); /* GET WHOLE FILE */
+    char *line_temp = vn_read(file_name, "rl", line, vns); /* GET CERTAIN LINE OF FILE */
 
     int i = 0, file_line = 1;
     while(strlen(file_temp)+1 > i) /* GET FILE NEW LINE COUNT */
@@ -49,7 +50,7 @@ void vnl_write(char *file_name, char *file_content, int line)
         if(file_temp[i] == '\n') { file_line+=1; }
         i+=1;
     }
-    if(line > file_line) /* ERROR WHEN ENTERED LINE INVAILD */
+    if(line > file_line && vns.fs_security !=2) /* ERROR WHEN ENTERED LINE INVAILD */
     {
         fprintf(stderr, "\n[ERROR] In 'vnl_write()' function. 'line' value greater than file line!\n");
         exit(1);
@@ -72,9 +73,9 @@ void vnl_write(char *file_name, char *file_content, int line)
     start_temp[start_len-1] = '\0'; /* ADD END OF LINE TO START BUFFER */
     i=0;
 
-    vn_write(file_name, start_temp, "ww"); /* WRITE START BUFFER TO FILE AS 'ww' (WRITE WHOLE) */
-    vn_write(file_name, "\n", "wa"); /* ADD NEW LINE */
-    vn_write(file_name, file_content, "wa"); /* WRITE NEW LINE TO FILE AS 'wa' (APPEND) */
+    vn_write(file_name, start_temp, "ww", vns); /* WRITE START BUFFER TO FILE AS 'ww' (WRITE WHOLE) */
+    vn_write(file_name, "\n", "wa", vns); /* ADD NEW LINE */
+    vn_write(file_name, file_content, "wa", vns); /* WRITE NEW LINE TO FILE AS 'wa' (APPEND) */
     if(line != file_line) /* IF LAST LINE OF FILE */
     {
         while(end_len > i) /* GET END BUFFER */
@@ -84,8 +85,8 @@ void vnl_write(char *file_name, char *file_content, int line)
         }
         end_temp[i] = '\0'; /* ADD END OF LINE TO END BUFFER */
 
-        vn_write(file_name, "\n", "wa"); /* ADD NEW LINE */
-        vn_write(file_name, end_temp, "wa"); /* WRITE END BUFFER TO FILE AS 'wa' (APPEND) */
+        vn_write(file_name, "\n", "wa", vns); /* ADD NEW LINE */
+        vn_write(file_name, end_temp, "wa", vns); /* WRITE END BUFFER TO FILE AS 'wa' (APPEND) */
     }
 
     free(file_temp);
