@@ -7,7 +7,7 @@
 # ![vn](img/vn.png) VARIATION FS ![vn](img/vn.png)
 Variation-fs is single-header file system library. Written in ansi-c. Simple to use, easy to learn and has small codebase. Also updatable thanks to MIT license (Just fork it then add or remove codes).
 
-### ![vn_info](img/vn_info.png)  1.0v
+### ![vn_info](img/vn_info.png)  1.1v
 
 ## ![vn_warn](img/vn_warn.png) Important Note ![vn_warn](img/vn_warn.png)
 
@@ -29,11 +29,14 @@ You need to define ` #define VN_FS_IMPLEMENTATION ` before ` #include "vn_fs.h" 
 
 int main()
 {
-  vn_write("test.txt", "Hey,\nhow are you?\nAre you good?", "ww");
-  printf("%s", vn_read("test.txt", "rw", 0));
+  struct vn_fss vns; /* VARIATION TUI SECURITY */
+  vns.fs_security = 0; /* STOP FUNCTION WHEN ERROR RECEIVED */
   
-  vnl_write("test.txt", "?ouy era woh", 2);
-  printf("%s", vnl_read("test.txt", 2, 4, 6));
+  vn_write("test.txt", "Hey,\nhow are you?\nAre you good?", "ww", vns);
+  printf("%s", vn_read("test.txt", "rw", 0, vns));
+  
+  vnl_write("test.txt", "?ouy era woh", 2, vns);
+  printf("%s", vnl_read("test.txt", 2, 4, 6, vns));
 
   return 0;
 }
