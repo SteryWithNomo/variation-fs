@@ -13,7 +13,7 @@ int main()
 
     vn_man("test_1.txt", "test_1_renamed.txt", "del", vns); /* NAME CHANGE */
     vn_man("test_2.txt", "test_2/test_2_move.txt", "del", vns); /* MOVE */
-    vn_man("test_3.txt", "test_3/test_3_copy.txt", "del", vns); /* COPY */
+    vn_man("test_3.txt", "test_3/test_3_copy.txt", "", vns); /* COPY */
 
     return 0;
 }
